@@ -3,9 +3,9 @@ const parseCssUrls = require('css-url-parser');
 const Spider = require('./lib/spider.js')
 
 options = {
-    startingUrl: 'https://blog.spuul.com',
-    depth: 1,
-    isAssetsIncluded: true
+    startingUrl: 'https://altspace.launchaco.com/',
+    depth: 2,
+    isAssetsIncluded: false
 }
 
 const spider = new Spider(options.depth, options.isAssetsIncluded)
@@ -14,7 +14,6 @@ spider.load(options.startingUrl, 0, requestHandler)
 
 function requestHandler(doc) {
     const nextDepth = doc.depth + 1
-
     if (nextDepth > spider.depth) return
 
     const domain = new URL(doc.url).origin
@@ -22,34 +21,23 @@ function requestHandler(doc) {
 
     if (doc.isCSS) {
         urls = parseCssUrls(doc.res)
-
         urls.forEach((url) => {
-
             if (url && !url.startsWith('http')) {
-
                 if (url.startsWith('..')) {
                     url = url.replace('..', '')
                 }
-
                 if (!url.startsWith('/')) {
                     url = `/${url}`
                 }
                 url = `${domain}${url}`
             }
             spider.load(url, nextDepth, requestHandler)
-
-
         })
-
         return
     }
 
     const $ = cheerio.load(doc.res)
     const hrefs = $("a")
-
-
-
-
 
     hrefs.each((i, element) => {
         let url = $(element).attr('href')
